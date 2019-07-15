@@ -5,11 +5,7 @@ import wave
 import time
 import sys
 
-if len(sys.argv) < 2:
-    print("Plays a wave file.\n\nUsage: %s filename.wav" % sys.argv[0])
-    sys.exit(-1)
-
-wf = wave.open(sys.argv[1], 'rb')
+wf = wave.open("FFern Uncut.wav", 'rb')
 
 # instantiate PyAudio (1)
 p = pyaudio.PyAudio()
@@ -17,6 +13,8 @@ p = pyaudio.PyAudio()
 # define callback (2)
 def callback(in_data, frame_count, time_info, status):
     data = wf.readframes(frame_count)
+    print(data)
+    print("-------------------")
     return (data, pyaudio.paContinue)
 
 # open stream using callback (3)
@@ -29,9 +27,8 @@ stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
 # start the stream (4)
 stream.start_stream()
 
-# wait for stream to finish (5)
-while stream.is_active():
-    time.sleep(0.1)
+# Don't want to play the whole thing whilst testing (5)
+time.sleep(3)
 
 # stop stream (6)
 stream.stop_stream()
