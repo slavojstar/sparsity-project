@@ -380,11 +380,24 @@ for j in range(len(M[0]))]
 pool = ThreadPool(100)
 results = pool.starmap(AvoidantPlay3, inArray)
 
+# alright, now let's try and hook it up to an audio interface
+
+import pyaudio
+
+p = pyaudio.PyAudio()
+
+def callback(in_data, frame_count, time_info, status):
+	# So here we need to read the states of each cell in the array
+	# and play as many tones as there are ones in the array
+	return (data, pyaudio.paContinue)
+
 def deprecated(fun):
 	def wrapped_fun(*args, **kwargs):
 		print("Warning: function %s is deprecated." %fun)
 		return fun(*args, **kwargs)
 	return wrapped_fun
+
+
 
 
 
