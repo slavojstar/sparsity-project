@@ -367,35 +367,75 @@ def PrintMatrix(M):
 
 	print(m_string)
 
-# M = np.array([[0, 0], [0, 0]])
-M = np.zeros((10, 10), dtype=int)
-# M = np.ones((5, 5), dtype=int)
-n = 1
-zeroStart = oneStart = 0.1
-zeroEnd = oneEnd = 5
+# # M = np.array([[0, 0], [0, 0]])
+# M = np.zeros((10, 10), dtype=int)
+# # M = np.ones((5, 5), dtype=int)
+# n = 1
+# zeroStart = oneStart = 0.1
+# zeroEnd = oneEnd = 5
 
-inArray = [(M, (i, j), n, zeroStart, zeroEnd, oneStart, oneEnd) for i in range(len(M))\
-for j in range(len(M[0]))]
+# inArray = [(M, (i, j), n, zeroStart, zeroEnd, oneStart, oneEnd) for i in range(len(M))\
+# for j in range(len(M[0]))]
 
-pool = ThreadPool(100)
-results = pool.starmap(AvoidantPlay3, inArray)
+# pool = ThreadPool(100)
+# results = pool.starmap(AvoidantPlay3, inArray)
 
 # alright, now let's try and hook it up to an audio interface
 
 import pyaudio
+import wave
 
 p = pyaudio.PyAudio()
 
-def callback(in_data, frame_count, time_info, status):
-	# So here we need to read the states of each cell in the array
-	# and play as many tones as there are ones in the array
-	return (data, pyaudio.paContinue)
+test_instrument = 0
+
+def SimpleResponseTest():
+	""" This function manipulates a simple test instrument to start
+	and stop playing randomly 5 times """
+	global test_instrument
+	print(test_instrument)
+	for i in range(4):
+		time.sleep(random.uniform(0, 2.5))
+		test_instrument = 1
+		print(test_instrument)
+		time.sleep(random.uniform(0, 2.5))
+		test_instrument = 0
+		print(test_instrument)
+
+def callback1(in_data, frame_count, time_info, status):
+	''' Plays white noise if test_instrument is 1, otherwise nothing'''
+	if test_instrument == 1:
+		# probably should use some
+		data = bytes(bytearray(os.urandom(100000)))
+		return (data, pyaudio.paContinue)
+	else:
+		data = bytes(bytearray(100000))
+		return (data, pyaudio.paContinue)
+
+stream = p.open(format=pyaudio.paInt16,
+	channels=1,
+	rate=44100,
+	output=True,
+	stream_callback=callback1)
+
+SimpleResponseTest()
+stream.start_stream()
+
+time.sleep(10)
+
+stream.stop_stream()
+stream.close()
+
+p.terminate()
+
+# Works!
 
 def deprecated(fun):
 	def wrapped_fun(*args, **kwargs):
 		print("Warning: function %s is deprecated." %fun)
 		return fun(*args, **kwargs)
 	return wrapped_fun
+	
 
 
 
